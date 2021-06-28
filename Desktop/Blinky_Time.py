@@ -4,7 +4,7 @@ import board
 
 print("hello blinky")
 
-led = digitalio.digitalInOut(board.D26)
+led = digitalio.DigitalInOut(board.D26)
 led.direction = digitalio.Direction.OUTPUT
 
 while True:
