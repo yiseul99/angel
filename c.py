@@ -26,6 +26,6 @@ try:
             StopTime = time()
 
             TimeElapsed = StopTime - StartTime
-            distance = (TimeElapsed *34300 / 2)
+            distance = (TimeElapsed *34300) / 2
             print("Measured Distance = %.1f cm " % distance)
             sleep(1)
