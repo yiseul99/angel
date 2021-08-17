@@ -4,6 +4,7 @@ import operator
 import collections
 import calcpoint
 import rospy
+import math
 from std_msgs.msg import Int32
 
 ser = serial.Serial(port = "/dev/ttyACM0", baudrate = 38400, timeout = 0.1)	
@@ -30,11 +31,15 @@ def checksum(sentence):
 	else:
 		return False 
 
-def dozzy():
+def location():
 
 	pub = rospy.Publisher('gps_xy', Int32, queue_size=10)
 	rospy.init_node('gps', anonymous=True)
 	rate = rospy.Rate(1) # 1hz
+	way_latitude = float(input("way_latitude: "))
+	way_longitude = float(input("way_longitude: "))
+	way_x, way_y = calcpoint.grid(way_latitude*100.0, way_longitude*100.0)
+	
 	while 1: 
 		data = ser.readline()
 		result = collections.defaultdict()
@@ -45,30 +50,38 @@ def dozzy():
 			result['latitude'] = float(res[2])
 			result['longitude'] = float(res[4])
 			result['altitude'] = float(res[9])
-			#print(data)
+			print(data)
 
 			if (res == "checksum error"):
 				print("")
-			#print(result)
+			print(result)
 			x, y = calcpoint.grid(result['latitude']*100.0,result['longitude']*100.0)
 
 			print("x =%f y =%f" %(x,y))
+
+			angle = (way_y-y)/(way_x-x)
+			way_angle = math.atan(angle)
+			way_degree = way_angle*180/math.pi
+			if (way_degree < 0):
+				way_degree += 360
+			print("way_angle: %f" %(way_degree))
 			
-			pub.publish(x)
-			pub.publish(y)
+			pub.publish(way_degree)
+			
 
 			rate.sleep()
 		except:
 			print("not found data")
-		if KeyboardInterrupt :
-			break
-		
+
+			if KeyboardInterrupt :
+				break
+			
 		
 
 
 if __name__ == '__main__':
 	try:	
-		dozzy()
+		location()
 
 	except rospy.ROSInterruptException:
 		pass
