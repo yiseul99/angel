@@ -36,10 +36,13 @@ def location():
 	pub = rospy.Publisher('gps_xy', Int32, queue_size=10)
 	rospy.init_node('gps', anonymous=True)
 	rate = rospy.Rate(1) # 1hz
-	way_latitude = float(input("way_latitude: "))
-	way_longitude = float(input("way_longitude: "))
-	way_x, way_y = calcpoint.grid(way_latitude*100.0, way_longitude*100.0)
-	
+	#way_latitude = float(input("way_latitude: "))
+	#way_longitude = float(input("way_longitude: "))
+	#way_x, way_y = calcpoint.grid(way_latitude*100.0, way_longitude*100.0)
+	way_x = float(input("way_x: "))
+	way_y = float(input("way_y: "))
+
+
 	while 1: 
 		data = ser.readline()
 		result = collections.defaultdict()
@@ -56,26 +59,31 @@ def location():
 				print("")
 			print(result)
 			x, y = calcpoint.grid(result['latitude']*100.0,result['longitude']*100.0)
-
+			
 			print("x =%f y =%f" %(x,y))
 
 			angle = (way_y-y)/(way_x-x)
-			way_angle = math.atan(angle)
-			way_degree = way_angle*180/math.pi
-			if (way_degree < 0):
-				way_degree += 360
-			print("way_angle: %f" %(way_degree))
+			degree = math.atan(angle)*(180/math.pi)	
 			
-			pub.publish(way_degree)
+			
+			if (degree <= 90):
+				bearing = 90-degree
+			elif (degree >= -90):
+				bearing = -1 *degree + 270
 			
 
+			print("bearing: %f" %(bearing))
+			
+			pub.publish(bearing)
+			
 			rate.sleep()
+			bearing = 0
 		except:
-			print("not found data")
+			#print("not found data")
 
-			if KeyboardInterrupt :
-				break
-			
+			#if KeyboardInterrupt :
+			#	break
+			pass
 		
 
 
