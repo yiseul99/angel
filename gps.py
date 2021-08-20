@@ -7,14 +7,14 @@ import rospy
 import math
 from std_msgs.msg import Int32
 
-ser = serial.Serial(port = "/dev/ttyACM0", baudrate = 38400, timeout = 0.1)	
+ser = serial.Serial(port = "/dev/ttyACM1", baudrate = 38400, timeout = 0.1)	
 
 def GPSparser(data):
 	gps_data = data.split(",")
 	idx_rmc = data.find('GNGGA')
 	if data[idx_rmc:idx_rmc+5] == "GNGGA":
 		data = data[idx_rmc:]	
-		#print (data)
+		print (data)
 		if checksum(data):
 			parsed_data = data.split(",")
 			return parsed_data
@@ -25,7 +25,7 @@ def checksum(sentence):
 	sentence = sentence.strip('\n')
 	nmeadata, cksum = sentence.split('*',1)
 	calc_cksum = reduce(operator.xor, (ord(s) for s in nmeadata), 0)
-	#print(int(cksum,16), calc_cksum)
+	print(int(cksum,16), calc_cksum)
 	if int(cksum,16) == calc_cksum:
 		return True 
 	else:
@@ -39,8 +39,10 @@ def location():
 	#way_latitude = float(input("way_latitude: "))
 	#way_longitude = float(input("way_longitude: "))
 	#way_x, way_y = calcpoint.grid(way_latitude*100.0, way_longitude*100.0)
-	way_x = float(input("way_x: "))
-	way_y = float(input("way_y: "))
+	way_x_1 = float(input("way_x_1: "))
+	way_y_1 = float(input("way_y_1: "))
+	#way_x_2 = float(input("way_x_2: "))
+	#way_y_2 = float(input("way_y_2: "))
 
 
 	while 1: 
@@ -50,34 +52,49 @@ def location():
 		if res == None:
 			continue
 		try:
-			result['latitude'] = float(res[2])
-			result['longitude'] = float(res[4])
+			lat = str (res[2])
+			lon = str (res[4])
 			result['altitude'] = float(res[9])
-			print(data)
+			
+			#print(data)
 
 			if (res == "checksum error"):
 				print("")
 			print(result)
-			x, y = calcpoint.grid(result['latitude']*100.0,result['longitude']*100.0)
+			#x, y = calcpoint.grid(result['latitude']*100.0,result['longitude']*100.0)
 			
-			print("x =%f y =%f" %(x,y))
+			
+			lat_h = float (lat[0:2])
+			lon_h = float(lon[0:3])
+			lat_m = float(lat[2:10])
+			lon_m = float(lon[3:11])
+			#print('lat_h: %f lon_h: %f lat_m: %f lon_m: %f' %(lat_h, lon_h, lat_m, lon_m))
 
-			angle = (way_y-y)/(way_x-x)
-			degree = math.atan(angle)*(180/math.pi)	
+			latitude = lat_h + (lat_m/60)
+			longitude = lon_h + (lon_m/60)
 			
+			print('latitude: %f longitude: %f' %(latitude,longitude)) 
+			x, y = calcpoint.grid(latitude ,longitude)
+			print("x = %f y = %f" %(x,y))
 			
-			if (degree <= 90):
-				bearing = 90-degree
-			elif (degree >= -90):
-				bearing = -1 *degree + 270
+			del_x_1 = way_x_1 - x
+			del_y_1 = way_y_1 - y
+			print("del_x_1 = %f del_y_1 = %f" %(del_x_1*10000,del_y_1*10000))
+			
+			#del_x_2 = way_x_2 - x
+			#del_y_2 = way_y_2 - y
+			#print("del_x_2 = %f del_y_2 = %f" %(del_x_2,del_y_2))
+
+			#del_list = [del_x_1, del_x_2, del_y_1, del_y_2]
+			del_list = [del_x_1, del_y_1]
 			
 
-			print("bearing: %f" %(bearing))
-			
-			pub.publish(bearing)
-			
+			pub.publish(del_list)
+
+
 			rate.sleep()
-			bearing = 0
+			
+
 		except:
 			#print("not found data")
 
