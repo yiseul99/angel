@@ -5,7 +5,7 @@ import collections
 import calcpoint
 import rospy
 import math
-from std_msgs.msg import Int32
+from std_msgs.msg import Float64
 
 ser = serial.Serial(port = "/dev/ttyACM1", baudrate = 38400, timeout = 0.1)	
 
@@ -33,7 +33,7 @@ def checksum(sentence):
 
 def location():
 
-	pub = rospy.Publisher('gps_xy', Int32, queue_size=10)
+	pub = rospy.Publisher('gps_xy', Float64, queue_size=10)
 	rospy.init_node('gps', anonymous=True)
 	rate = rospy.Rate(1) # 1hz
 	#way_latitude = float(input("way_latitude: "))
@@ -77,9 +77,9 @@ def location():
 			x, y = calcpoint.grid(latitude ,longitude)
 			print("x = %f y = %f" %(x,y))
 			
-			del_x_1 = way_x_1 - x
-			del_y_1 = way_y_1 - y
-			print("del_x_1 = %f del_y_1 = %f" %(del_x_1*10000,del_y_1*10000))
+			del_x_1 = (way_x_1 - x)*10000
+			del_y_1 = (way_y_1 - y)*10000
+			print("del_x_1 = %f del_y_1 = %f" %(del_x_1,del_y_1))
 			
 			#del_x_2 = way_x_2 - x
 			#del_y_2 = way_y_2 - y
@@ -89,7 +89,7 @@ def location():
 			del_list = [del_x_1, del_y_1]
 			
 
-			pub.publish(del_list)
+			pub.publish(del_y_1)
 
 
 			rate.sleep()
