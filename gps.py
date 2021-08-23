@@ -6,9 +6,9 @@ import calcpoint
 import rospy
 import math
 from std_msgs.msg import Float64
-from std_msgs.msg import UInt16MultiArray,MultiArrayLayout,MultiArrayDimension
+from std_msgs.msg import Float64MultiArray#,MultiArrayLayout,MultiArrayDimension
 
-ser = serial.Serial(port = "/dev/ttyACM1", baudrate = 38400, timeout = 0.1)	
+ser = serial.Serial(port = "/dev/ttyACM0", baudrate = 38400, timeout = 0.1)	
 
 def GPSparser(data):
 	gps_data = data.split(",")
@@ -34,7 +34,7 @@ def checksum(sentence):
 
 def location():
 
-	pub = rospy.Publisher('gps_xy', UInt16MultiArray, queue_size=10)
+	pub = rospy.Publisher('gps_xy', Float64MultiArray, queue_size=10)
 	rospy.init_node('gps', anonymous=True)
 	rate = rospy.Rate(1) # 1hz
 
@@ -67,7 +67,7 @@ def location():
 			#x, y = calcpoint.grid(result['latitude']*100.0,result['longitude']*100.0)
 			
 			
-			lat_h = float (lat[0:2])
+			lat_h = float(lat[0:2])
 			lon_h = float(lon[0:3])
 			lat_m = float(lat[2:10])
 			lon_m = float(lon[3:11])
@@ -79,16 +79,19 @@ def location():
 			print('latitude: %f longitude: %f' %(latitude,longitude)) 
 			#x, y = calcpoint.grid(latitude ,longitude)
 			#print("x = %f y = %f" %(x,y))
-			
+
+			value = Float64MultiArray()
+		
 			del_lati = (way_latitude - latitude)*100
 			del_longi = (way_longitude - longitude)*100
 			print("del_lati = %f del_longi = %f" %(del_lati,del_longi))
-			value.data = Float64MultiArray()
+			value.data = [del_lati,del_longi]
+			
 			#del_x_2 = way_x_2 - x
 			#del_y_2 = way_y_2 - y
 			#print("del_x_2 = %f del_y_2 = %f" %(del_x_2,del_y_2))
 
-			value.data = [del_lati, del_longi]
+				
 			
 			pub.publish(value)
 		    
