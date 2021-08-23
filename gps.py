@@ -6,6 +6,7 @@ import calcpoint
 import rospy
 import math
 from std_msgs.msg import Float64
+from std_msgs.msg import UInt16MultiArray
 
 ser = serial.Serial(port = "/dev/ttyACM1", baudrate = 38400, timeout = 0.1)	
 
@@ -33,14 +34,17 @@ def checksum(sentence):
 
 def location():
 
-	pub = rospy.Publisher('gps_xy', Float64, queue_size=10)
+	pub = rospy.Publisher('gps_xy', UInt16MultiArray, queue_size=10)
 	rospy.init_node('gps', anonymous=True)
 	rate = rospy.Rate(1) # 1hz
-	#way_latitude = float(input("way_latitude: "))
-	#way_longitude = float(input("way_longitude: "))
+	way_latitude = float(input("way_latitude: "))
+	way_longitude = float(input("way_longitude: "))
+        value = UInt16MultiArray();
+        value[0].data = way_latitude;
+        value[1].data = way_longitude;
 	#way_x, way_y = calcpoint.grid(way_latitude*100.0, way_longitude*100.0)
-	way_x_1 = float(input("way_x_1: "))
-	way_y_1 = float(input("way_y_1: "))
+	#way__1 = float(input("way_x_1: "))
+	#way_y_1 = float(input("way_y_1: "))
 	#way_x_2 = float(input("way_x_2: "))
 	#way_y_2 = float(input("way_y_2: "))
 
@@ -74,22 +78,22 @@ def location():
 			longitude = lon_h + (lon_m/60)
 			
 			print('latitude: %f longitude: %f' %(latitude,longitude)) 
-			x, y = calcpoint.grid(latitude ,longitude)
-			print("x = %f y = %f" %(x,y))
+			#x, y = calcpoint.grid(latitude ,longitude)
+			#print("x = %f y = %f" %(x,y))
 			
-			del_x_1 = (way_x_1 - x)*10000
-			del_y_1 = (way_y_1 - y)*10000
-			print("del_x_1 = %f del_y_1 = %f" %(del_x_1,del_y_1))
+			del_lati = (way_latitude - latitude)*10000
+			del_longi = (way_longitude - longitude)*10000
+			print("del_lati = %f del_longi = %f" %(del_lati,del_longi))
 			
 			#del_x_2 = way_x_2 - x
 			#del_y_2 = way_y_2 - y
 			#print("del_x_2 = %f del_y_2 = %f" %(del_x_2,del_y_2))
-
-			#del_list = [del_x_1, del_x_2, del_y_1, del_y_2]
-			del_list = [del_x_1, del_y_1]
+			value[0].data = del_lati;
+        		value[1].data = del_longi;
 			
 
-			pub.publish(del_y_1)
+			pub.publish(value)
+		    
 
 
 			rate.sleep()
