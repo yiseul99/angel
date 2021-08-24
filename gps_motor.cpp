@@ -15,7 +15,7 @@
 
 #include <ros.h> //yiseul
 #include <Wire.h>
-#include <std_msgs/UInt16MultiArray.h> //yiseul
+#include <std_msgs/Float32MultiArray.h> //yiseul
 #include <std_msgs/String.h>
 #include <std_msgs/Float64.h>
 #include <string.h>
@@ -28,25 +28,26 @@ Servo left;
 MLX90393 mlx;
 MLX90393::txyz data; //Create a structure, called data, of four floats (t, x, y, and z)
 std_msgs::Float64 angle; //yiseul
-std_msgs::UInt16MultiArray cmd_msg;
+std_msgs::Float32MultiArray cmd_msg;
 //ros::Publisher heading_angle("heading_angle", &angle); //yiseul
 ros::NodeHandle  nh;
 byte motor_left = 8;
 byte motor_right = 10;
+float difference = 2;
 
 String str;
 float del_lati;///
 float del_longi;///
 
-void messageLati(const std_msgs::UInt16MultiArray& cmd_msg)///
+void messageLati(const std_msgs::Float32MultiArray& cmd_msg)///
 {
   Serial.println("msg.data"); ///
   del_lati = cmd_msg.data[0];///
-   del_longi = cmd_msg.data[1];
+  del_longi = cmd_msg.data[1];
 }
 
 
-ros::Subscriber <std_msgs::Float64> sub("gps_xy", messageLati);///
+ros::Subscriber <std_msgs::Float32MultiArray> sub("gps_xy", messageLati);///
 
 void setup()
 {
@@ -87,7 +88,7 @@ void loop()
 
   float way_x;
   float way_y;
-  float difference = 1;
+  
   float x;
   float y;
  // float h_angle; //yiseul
@@ -117,25 +118,25 @@ void loop()
  //  heading = heading * 180/M_PI;
   
  
-    if (way_y - y && way_x - x) //first_Case
+    if (del_longi > 0   && del_lati > 0) //first_Case
     {
       
-      left.writeMicroseconds(1600); //
+      left.writeMicroseconds(1550); //
       right.writeMicroseconds(1520); //
      // Serial.println("Go_straight");
       
     }
-    else if(way_y - y < 0 && way_x -x > 0) //second_case
+    else if(del_longi < 0 && del_lati > 0) //second_case
     {
       left.writeMicroseconds(1520); //
-      right.writeMicroseconds(1600); //
+      right.writeMicroseconds(1550); //
     //  Serial.println("Turn Right1");
       
     }
-     else if(way_x - x < difference && way_y - y < difference) //second_case
+     else if(del_lati < difference && del_longi < difference) //second_case
     {
-      left.writeMicroseconds(1600); //
-      right.writeMicroseconds(1600); //
+      left.writeMicroseconds(1550); //
+      right.writeMicroseconds(1550); //
     //  Serial.println("Turn Right1");
      
     }
