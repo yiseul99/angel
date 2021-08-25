@@ -33,7 +33,7 @@ std_msgs::Float32MultiArray cmd_msg;
 ros::NodeHandle  nh;
 byte motor_left = 8;
 byte motor_right = 10;
-float difference = 2;
+float difference = 3;
 
 String str;
 float del_lati;///
@@ -118,7 +118,7 @@ void loop()
  //  heading = heading * 180/M_PI;
   
  
-    if (del_longi > 0   && del_lati > 0) //first_Case
+    if (del_longi > difference && del_lati > difference) //first_Case
     {
       
       left.writeMicroseconds(1550); //
