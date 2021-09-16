@@ -35,8 +35,8 @@ def location():
 	way_latitude = float(input("way_latitude: "))
 	way_longitude = float(input("way_longitude: "))
 
-    rotate_way_latitude = math.cos(-0.629645)*way_latitude - math.sin(-0.629645)*way_longitude
-    rotate_way_longitude = math.sin(-0.629645)*way_latitude + math.cos(-0.629645)*way_longitude
+    	rotate_way_latitude = math.cos(-0.629645)*way_latitude - math.sin(-0.629645)*way_longitude
+    	rotate_way_longitude = math.sin(-0.629645)*way_latitude + math.cos(-0.629645)*way_longitude
 
 	while 1: 
 		data = ser.readline()
@@ -63,11 +63,11 @@ def location():
 			longitude = lon_h + (lon_m/60)
 			
 			print('latitude: %f longitude: %f' %(latitude,longitude))
-            rotate_latitude = math.cos(-0.629645)*latitude - math.sin(-0.629645)*longitude
-            rotate_longitude = math.sin(-0.629645)*latitude + math.cos(-0.629645)*longitude
+            		rotate_latitude = math.cos(-0.629645)*latitude - math.sin(-0.629645)*longitude
+            		rotate_longitude = math.sin(-0.629645)*latitude + math.cos(-0.629645)*longitude
             
 			print('rotate_latitude: %f rotate_longitude: %f' %(rotate_latitude, rotate_longitude))
-            del_lati = rotate_latitude - rotate_way_latitude	
+            		del_lati = rotate_latitude - rotate_way_latitude	
 			del_longi = rotate_longitude - rotate_way_longitude
 
 			print('del_lati: %f del_longi: %f' %(del_lati,del_longi))
